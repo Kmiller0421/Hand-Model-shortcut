@@ -3,9 +3,6 @@ import cv2
 import numpy as np
 from google.protobuf.json_format import MessageToDict
 
-MARGIN = 10  # pixels
-ROW_SIZE = 10  # pixels
-
 class Hand:
     def __init__(self):
         self.mp_hands = mp.solutions.hands.Hands(
@@ -23,6 +20,7 @@ class Hand:
             while True:
                 success, img = webcam.read()
                 if not success:
+                    print("Camera frame is empty")
                     break
 
                 h, w, c = img.shape
@@ -31,7 +29,7 @@ class Hand:
                 img = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
 
                 if image_results.multi_hand_landmarks:
-                    for handLMs in image_results.multi_hand_landmarks:
+                    for i, handLMs in enumerate (image_results.multi_hand_landmarks):
                         x_max = 0
                         y_max = 0
                         x_min = w
@@ -54,16 +52,16 @@ class Hand:
                         label_x = x_min
                         label_y = y_min - 10 # Position above the top of the hand
 
-                        for i in image_results.multi_handedness:
-                           label = MessageToDict(i)['classification'][0]['label']
-                           if label == 'Left':
-                               # Display 'Left Hand' on the left side of the window
-                               cv2.putText(img, label + ' Hand', (label_x, label_y), cv2.FONT_HERSHEY_COMPLEX, 0.7, (138,43,226), 2)
-                            
-                           if label == 'Right':
-                               # Display 'Right Hand' on the right side of the window
-                               cv2.putText(img, label + ' Hand', (label_x, label_y), cv2.FONT_HERSHEY_COMPLEX, 0.7, (138,43,226), 2)
+                        handedness = image_results.multi_handedness[i]
 
+                        label = MessageToDict(handedness)['classification'][0]['label']
+                        (label_width, label_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+
+                        cv2.rectangle(img, (label_x - 1, label_y + baseline - label_height - 20), 
+                        (label_x + label_width + 80, label_y + baseline), (0, 0, 0), -1)
+                        # Display 'Left Hand' on the left side of the window
+                        cv2.putText(img, label + 'Hand', (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                           
                 cv2.imshow('Hand Tracking', img)
                 if cv2.waitKey(10) & 0xFF == ord('q'):
                   break
