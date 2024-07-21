@@ -1,0 +1,174 @@
+import cv2
+import mediapipe as mp
+from google.protobuf.json_format import MessageToDict
+from Calculations import Calculations
+from Task import Task
+import time
+
+class HandModel:
+    def __init__(self):
+        self.mp_hands = mp.solutions.hands.Hands(
+            static_image_mode=True,
+            model_complexity=1,
+            min_detection_confidence=0.75,
+            min_tracking_confidence=0.75,
+            max_num_hands=2
+        )
+        self.mp_drawing = mp.solutions.drawing_utils
+        self.MIDDLE_FINGER_TIP = mp.solutions.hands.HandLandmark.MIDDLE_FINGER_TIP.value
+        self.INDEX_FINGER_TIP = mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP.value
+        self.RING_FINGER_TIP = mp.solutions.hands.HandLandmark.RING_FINGER_TIP.value
+        self.PINKY_FINGER_TIP = mp.solutions.hands.HandLandmark.PINKY_TIP.value
+        self.THUMB_TIP = mp.solutions.hands.HandLandmark.THUMB_TIP.value
+
+    def initialize_hand_model(self, webcam):
+
+        c = Calculations()
+        t = Task()
+
+        with self.mp_hands as hands:
+            while True:
+                success, img = webcam.read()
+                if not success:
+                    break
+
+                # Convert the BGR image to RGB
+                img_rgb = cv2.cvtColor(cv2.flip(img, 1), cv2.COLOR_BGR2RGB)
+
+                # Process the image with MediaPipe Hands
+                results = hands.process(img_rgb)
+
+                # Convert the RGB image back to BGR
+                img = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+
+                # Draw hand landmarks if detected
+                if results.multi_hand_landmarks:
+                    for i in results.multi_handedness:
+                        # Return whether it is Right or Left Hand
+                        label = MessageToDict(i)['classification'][0]['label']
+
+                        if label == 'Left':
+                            # Display 'Left Hand' on the left side of the window
+                            cv2.putText(img, label + ' Hand', (20, 50),
+                                        cv2.FONT_HERSHEY_COMPLEX, 0.9,
+                                        (0, 255, 0), 2)
+
+                        if label == 'Right':
+                            # Display 'Right Hand' on the right side of the window
+                            cv2.putText(img, label + ' Hand', (460, 50),
+                                        cv2.FONT_HERSHEY_COMPLEX,
+                                        0.9, (0, 255, 0), 2)
+
+                        for hand_landmarks in results.multi_hand_landmarks:
+                            self.mp_drawing.draw_landmarks(img, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+
+                            middle_finger_tip = hand_landmarks.landmark[self.MIDDLE_FINGER_TIP]
+                            index_finger_tip = hand_landmarks.landmark[self.INDEX_FINGER_TIP]
+                            ring_finger_tip = hand_landmarks.landmark[self.RING_FINGER_TIP]
+                            pinky_finger_tip = hand_landmarks.landmark[self.PINKY_FINGER_TIP]
+                            thumb_tip = hand_landmarks.landmark[self.THUMB_TIP]
+
+                            distance_1 = c.calculate_distance(index_finger_tip, thumb_tip)
+                            distance_2 = c.calculate_distance(middle_finger_tip, thumb_tip)
+                            distance_3 = c.calculate_distance(ring_finger_tip, thumb_tip)
+                            distance_4 = c.calculate_distance(pinky_finger_tip, thumb_tip)
+
+                            limit = 0.1
+
+                            if label == "Left":
+                                if distance_1 < limit:
+                                    value = 1
+                                    t.applications(value)
+                                elif distance_2 < limit:
+                                    value = 2
+                                    t.applications(value)
+                                elif distance_3 < limit:
+                                    value = 3
+                                    t.applications(value)
+                                elif distance_4 < limit:
+                                    value = 4
+                                    t.applications(value)
+                            
+                            if label == "Right":
+                                if distance_1 < limit:
+                                    value = 1
+                                    t.music_controls(value)
+                                elif distance_2 < limit:
+                                    value = 2
+                                    t.music_controls(value)
+                                elif distance_3 < limit:
+                                    value = 3
+                                    t.music_controls(value)
+
+
+
+                            print(f"Distance 1: {distance_1}")
+                            print(f"Distance 2: {distance_2}")
+                            print(f"Distance 3: {distance_3}")
+                            print(f"Distance 4: {distance_4}")
+
+
+                # Display the image with hand landmarks
+                cv2.imshow('Hand Tracking', img)
+
+                # Break the loop if 'q' key is pressed
+                if cv2.waitKey(10) & 0xFF == ord('q'):
+                    break
+
+        webcam.release()
+        cv2.destroyAllWindows()
+
+from AppOpener import open
+import pyautogui
+import time
+
+class Task:
+    def __init__(self):
+        self.last_action_time = time.time()
+
+    def debounce(self, delay=0.5):
+        current_time = time.time()
+        if current_time - self.last_action_time >= delay:
+            self.last_action_time = current_time
+            return True
+        return False
+
+    def applications(self, value):
+        if self.debounce():
+          if value == 1:
+              open("Google Chrome", match_closest=True)
+          elif value == 2:
+              open("Spotify", match_closest=True)
+          elif value == 3:
+              open("Steam", match_closest=True)
+
+    def music_controls(self, value):
+        if self.debounce():
+          if value == 1:
+              pyautogui.press('playpause')
+          elif value == 2:
+              pyautogui.press('prevtrack')
+          elif value == 3:
+              pyautogui.press('nexttrack')
+
+    def clear_actions(self):
+        # Clear any previous actions if no finger is close enough
+        pass  # You can implement any reset functionality here if needed
+
+        import cv2
+import mediapipe as mp
+from HandModel import HandModel
+
+def main():
+    webcam = cv2.VideoCapture(0)
+
+    hm = HandModel()
+
+    if not webcam.isOpened():
+        print("Error: Could not find or open webcam.")
+        exit()
+
+    hm.initialize_hand_model(webcam)
+
+if __name__ == "__main__":
+    main()
