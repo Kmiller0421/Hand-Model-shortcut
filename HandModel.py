@@ -1,13 +1,12 @@
 import cv2
 import mediapipe as mp
-
 import math
-
-from google.protobuf.json_format import MessageToDict
-
-from AppOpener import open
 import pyautogui
 import time
+import tkinter as tk
+from tkinter import *
+from AppOpener import open
+from google.protobuf.json_format import MessageToDict
 
 class Hand:
     def __init__(self):
@@ -51,19 +50,26 @@ class Hand:
                     # I am grabing hand landmark positions and returning them as an enumerating object
                     for i, handLMs in enumerate (image_results.multi_hand_landmarks):
 
-                        x_max, y_max = 0
-                        x_min = w, y_min = h
+                        x_max = 0
+                        y_max = 0
+                        x_min = w
+                        y_min = h
 
+                        # Calculating the coordinates of a bounding box around the detected hand
                         for lm in handLMs.landmark:
                             x, y = int(lm.x * w), int(lm.y * h)
+                            # Keeps track of the farthest point to the right
                             if x > x_max:
-                              x_max = x
+                              x_max = x 
+                            # Keeps track of the farthest point to the left            
                             if x < x_min:
-                              x_min = x
+                              x_min = x    
+                            # Keeps track of the lowest point         
                             if y > y_max:
-                              y_max = y
+                              y_max = y      
+                            # Keeps track of the highest point       
                             if y < y_min:
-                              y_min = y
+                              y_min = y             
 
                         # Draw a bounding box around the hand based on landmark positions
                         cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (138,43,226), 2)
@@ -83,7 +89,9 @@ class Hand:
                         # Display 'Left Hand', 'Right Hand' or both on the hand window
                         cv2.putText(img, label + ' Hand', (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
-                        self.mp_drawing.draw_landmarks(img, handLMs, mp.solutions.hands.HAND_CONNECTIONS)
+                        # Draw landmarks on the hand
+                        self.mp_drawing.draw_landmarks(img, handLMs, mp.solutions.hands.HAND_CONNECTIONS, self.mp_drawing.DrawingSpec(color=(2, 214, 30), thickness=2, circle_radius=2), 
+                                                       self.mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2))
 
                         middle_finger_tip = handLMs.landmark[self.MIDDLE_FINGER_TIP]
                         index_finger_tip = handLMs.landmark[self.INDEX_FINGER_TIP]
@@ -100,7 +108,6 @@ class Hand:
                         distance_4 = dist.point_distance(pinky_finger_tip, thumb_tip)
 
                         threshold = 0.04
-                        print(i, handLMs)
 
                         t = Task()
 
@@ -169,6 +176,7 @@ class Task:
             time.sleep(0.2)
 
 def main():
+
     webcam = cv2.VideoCapture(0)
     hm = Hand()
 
@@ -184,6 +192,21 @@ def main():
     webcam.release()
 
 if __name__ == "__main__":
-    main()
 
+    window = tk.Tk()
+
+    window.configure(bg="Grey")
+
+    window.geometry("700x350")
+
+    window.title("HMS")
+
+    title = tk.Label(window, text="Hand Model Shortcut", font=('Arial', 24, 'bold', 'italic'),
+                 foreground="black", background="grey")
+    title.place(relx=0.5, rely=0.4, anchor='center')
+
+    start_button = tk.Button(window, text="click", command=main, padx=20, pady=10)
+    start_button.place(relx=0.5, rely=0.6, anchor='center')
+    
+    window.mainloop()
     
