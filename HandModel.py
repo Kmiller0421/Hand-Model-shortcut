@@ -191,6 +191,24 @@ def main():
 
     webcam.release()
 
+def instructions():
+       #Create a canvas object
+        canvas = Canvas(window, width= 700, height= 350, bg="grey")
+
+        center_x = 350
+        left_y = 100
+        right_y = 250
+
+        #Add a text in Canvas
+        canvas.create_text(center_x, left_y-70, text="Left Hand", fill="black", font=('Helvetica 9 bold'), anchor="center")
+        canvas.create_text(center_x, left_y, text="Index Finger + Thumb (Shortcut 1)\n Middle Finger + Thumb (Shortcut 2)\n Ring Finger + Thumb (Shortcut 3)\n Pinky Finger + Thumb (Shortcut 4 'esc')", fill="black", font=('Helvetica 12 bold'))
+
+        #Add a text in Canvas
+        canvas.create_text(center_x, right_y-60, text="Right Hand", fill="black", font=('Helvetica 9 bold'), anchor="center")
+        canvas.create_text(center_x, right_y, text="Index Finger + Thumb (Play)\n Middle Finger + Thumb (Next Track)\n Ring Finger + Thumb (Previous Track)", fill="black", font=('Helvetica 12 bold'))
+        
+        canvas.pack()
+
 if __name__ == "__main__":
 
     window = tk.Tk()
@@ -203,10 +221,19 @@ if __name__ == "__main__":
 
     title = tk.Label(window, text="Hand Model Shortcut", font=('Arial', 24, 'bold', 'italic'),
                  foreground="black", background="grey")
-    title.place(relx=0.5, rely=0.4, anchor='center')
+    title.place(relx=0.5, rely=0.2, anchor='center')
 
-    start_button = tk.Button(window, text="click", command=main, padx=20, pady=10)
-    start_button.place(relx=0.5, rely=0.6, anchor='center')
+    start_button = tk.Button(window, text="Start", padx=20, pady=10)  #command=main
+    start_button.place(relx=0.5, rely=0.4, anchor='center')
+
+    settings_button = tk.Button(window, text="Settings", padx=20, pady=10)
+    settings_button.place(relx=0.5, rely=0.6, anchor='center')
+
+    instructions_button = tk.Button(window, text="Instructions", command=instructions, padx=20, pady=10)
+    instructions_button.place(relx=0.5, rely=0.8, anchor='center')
+
+    
+    
     
     window.mainloop()
     
