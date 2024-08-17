@@ -192,38 +192,42 @@ def main():
     webcam.release()
 
 def instructions():
-       #Create a canvas object
-        canvas = Canvas(window, width= 700, height= 350, bg="grey")
+    # Clear previous widgets
+    for widget in window.winfo_children():
+        widget.destroy()
 
-        center_x = 350
-        left_y = 100
-        right_y = 250
+    # Create a canvas object
+    canvas = tk.Canvas(window, width=700, height=350, bg="grey")
 
-        #Add a text in Canvas
-        canvas.create_text(center_x, left_y-70, text="Left Hand", fill="black", font=('Helvetica 9 bold'), anchor="center")
-        canvas.create_text(center_x, left_y, text="Index Finger + Thumb (Shortcut 1)\n Middle Finger + Thumb (Shortcut 2)\n Ring Finger + Thumb (Shortcut 3)\n Pinky Finger + Thumb (Shortcut 4 'esc')", fill="black", font=('Helvetica 12 bold'))
+    center_x = 250
+    left_y = 100
+    right_y = 250
 
-        #Add a text in Canvas
-        canvas.create_text(center_x, right_y-60, text="Right Hand", fill="black", font=('Helvetica 9 bold'), anchor="center")
-        canvas.create_text(center_x, right_y, text="Index Finger + Thumb (Play)\n Middle Finger + Thumb (Next Track)\n Ring Finger + Thumb (Previous Track)", fill="black", font=('Helvetica 12 bold'))
-        
-        canvas.pack()
+    # Add a text in Canvas
+    canvas.create_text(center_x, left_y - 70, text="Left Hand", fill="black", font=('Helvetica 9 bold'), anchor="center")
+    canvas.create_text(center_x, left_y, text="Index Finger + Thumb (Shortcut 1)\nMiddle Finger + Thumb (Shortcut 2)\nRing Finger + Thumb (Shortcut 3)\nPinky Finger + Thumb (Shortcut 4 'esc')", fill="black", font=('Helvetica 12 bold'))
 
-if __name__ == "__main__":
+    # Add a text in Canvas
+    canvas.create_text(center_x, right_y - 60, text="Right Hand", fill="black", font=('Helvetica 9 bold'), anchor="center")
+    canvas.create_text(center_x, right_y, text="Index Finger + Thumb (Play)\nMiddle Finger + Thumb (Next Track)\nRing Finger + Thumb (Previous Track)", fill="black", font=('Helvetica 12 bold'))
 
-    window = tk.Tk()
+    canvas.pack()
 
-    window.configure(bg="Grey")
+    # Add a Back button
+    back_button = tk.Button(window, text="Back", command=menu, padx=20, pady=10)
+    back_button.place(relx=0.5, rely=0.8, anchor='center')
 
-    window.geometry("700x350")
 
-    window.title("HMS")
+def menu():
+    # Clear previous widgets
+    for widget in window.winfo_children():
+        widget.destroy()
 
     title = tk.Label(window, text="Hand Model Shortcut", font=('Arial', 24, 'bold', 'italic'),
-                 foreground="black", background="grey")
+                     foreground="black", background="grey")
     title.place(relx=0.5, rely=0.2, anchor='center')
 
-    start_button = tk.Button(window, text="Start", padx=20, pady=10)  #command=main
+    start_button = tk.Button(window, text="Start", padx=20, pady=10)  # Add the command for the main function
     start_button.place(relx=0.5, rely=0.4, anchor='center')
 
     settings_button = tk.Button(window, text="Settings", padx=20, pady=10)
@@ -232,8 +236,13 @@ if __name__ == "__main__":
     instructions_button = tk.Button(window, text="Instructions", command=instructions, padx=20, pady=10)
     instructions_button.place(relx=0.5, rely=0.8, anchor='center')
 
-    
-    
-    
     window.mainloop()
-    
+
+
+if __name__ == "__main__":
+    window = tk.Tk()
+    window.configure(bg="Grey")
+    window.geometry("700x350")
+    window.title("HMS")
+
+    menu()
