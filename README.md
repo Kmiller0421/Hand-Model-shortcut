@@ -26,3 +26,5 @@ This implementation enables seamless control of these functions by touching my f
 * Accurately determining the threshold for detecting when two fingers touch, ensuring that multiple inputs aren’t triggered unintentionally when performing a gesture.
 
 # Demo video - :movie_camera:
+https://github.com/user-attachments/assets/5c3c0aff-dda6-48f8-acc4-e63fd2d35b27
+
